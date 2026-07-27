@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vive FM - Online Siempre Contigo</title>
+    <!-- Iconos profesionales FontAwesome -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+                body {
+            /* Imagen de fondo premium comercial enfocada en música y ondas de sonido */
+            background: linear-gradient(rgba(13, 13, 19, 0.1), rgba(13, 13, 19, 0.19)), 
+                        url('img/logo.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        /* Botón de reproducción maestro */
+        .master-play-btn {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px var(--border-glow);
+            transition: transform 0.2s, background 0.4s, box-shadow 0.4s;
+            position: relative;
+        }
+        .master-play-btn:hover { transform: scale(1.08); }
+        .master-play-btn:active { transform: scale(0.95); }
+
+        /* Triángulo de Play hecho puramente con CSS */
+        .play-triangle {
+            width: 0;
+            height: 0;
+            border-top: 14px solid transparent;
+            border-bottom: 14px solid transparent;
+            border-left: 24px solid #0d0d13; /* Color oscuro que resalta con el fondo neón */
+            margin-left: 6px; /* Desplazamiento óptico para que quede perfectamente centrado */
+            transition: all 0.2s ease;
+        }
+
+        /* Forma de dos barras verticales cuando esté en pausa */
+        .master-play-btn.playing .play-triangle {
+            width: 2px;
+            height: 24px;
+            border: double #0d0d13;
+            border-width: 0px 0px 0px 20px;
+            margin-left: 0px;
+        }
+        
+        
+        
+        
+        
+      
+
+        /* Contenedor Principal Ajustable a Móviles */
+        .main-wrapper {
+            width: 100%;
+            max-width: 480px; /* Tamaño ideal para smartphones y centrado en PC */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        /* 1. SECCIÓN SUPERIOR: ESTADO STREAMING */
+        .header-status {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: -5px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .status-live { color: #ff334b; }
+        .status-live .dot {
+            background-color: #ff334b;
+            box-shadow: 0 0 10px #ff334b;
+            animation: pulseGlow 1.2s infinite alternate;
+        }
+
+        .status-off { color: #2ecc71; display: none; }
+        .status-off .dot {
+            background-color: #2ecc71;
+            box-shadow: 0 0 10px #2ecc71;
+        }
+
+        @keyframes pulseGlow {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0.4; transform: scale(1.15); }
+        }
+
+        /* REPRODUCTOR PROFESIONAL CON TRANSPARENCIA */
+        .premium-player {
+            background: var(--player-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 30px;
+            padding: 30px 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            text-align: center;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        /* Selector de Color Integrado */
+        .color-palette {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .color-opt {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        .color-opt:hover { transform: scale(1.2); }
+        .color-opt.active { border-color: #ffffff; transform: scale(1.1); }
+        .c-cyan { background: #00f0ff; }
+        .c-purple { background: #a100ff; }
+        .c-neon-green { background: #39ff14; }
+        .c-orange { background: #ff6b00; }
+
+        /* Contenedor del Logotipo de la Emisora */
+        .logo-station-container {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 20px auto;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1f1f32, #161622);
+            padding: 6px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.4s ease;
+        }
+
+        .logo-station-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        /* Metadatos */
+        .music-info {
+            margin-bottom: 25px;
+        }
+
+        .song-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .artist-name {
+            font-size: 14px;
+            color: #a0a0b0;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .playback-time {
+            font-size: 13px;
+            font-family: monospace;
+            color: var(--primary-color);
+            background: rgba(0,0,0,0.3);
+            padding: 4px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            transition: color 0.4s;
+        }
+
+        /* Ondas de Audio / Ecualizador Visual */
+        .audio-wave {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 40px;
+            gap: 5px;
+            margin-bottom: 25px;
+        }
+
+        .wave-bar {
+            width: 5px;
+            height: 6px;
+            background: var(--primary-color);
+            border-radius: 10px;
+            transition: height 0.15s ease, background 0.4s;
+        }
+
+        /* Animación fluida de ecualizador comercial al dar play */
+        .audio-wave.active .wave-bar {
+            animation: modernEqualizer 1s ease-in-out infinite alternate;
+        }
+        .audio-wave.active .wave-bar:nth-child(1) { animation-duration: 0.6s; }
+        .audio-wave.active .wave-bar:nth-child(2) { animation-duration: 0.8s; animation-delay: 0.15s; }
+        .audio-wave.active .wave-bar:nth-child(3) { animation-duration: 0.5s; animation-delay: 0.3s; }
+        .audio-wave.active .wave-bar:nth-child(4) { animation-duration: 0.9s; animation-delay: 0.05s; }
+        .audio-wave.active .wave-bar:nth-child(5) { animation-duration: 0.7s; animation-delay: 0.2s; }
+        .audio-wave.active .wave-bar:nth-child(6) { animation-duration: 0.6s; animation-delay: 0.4s; }
+
+        @keyframes modernEqualizer {
+            0% { height: 6px; }
+            100% { height: 38px; }
+        }
+
+        /* Controles de Audio */
+        .player-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .master-play-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: none;
+            color: #0d0d13;
+            font-size: 26px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px var(--border-glow);
+            transition: transform 0.2s, background 0.4s, box-shadow 0.4s;
+        }
+        .master-play-btn:hover { transform: scale(1.06); }
+        .master-play-btn:active { transform: scale(0.95); }
+
+        .volume-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 85%;
+            color: #a0a0b0;
+        }
+
+        .volume-bar-input {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        .volume-bar-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+
+        /* 2. SECCIÓN INTERMEDIA: CONTENEDOR DE PUBLICIDAD CON IMAGEN */
+        .commercial-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .commercial-container img {
+            width: 100%;
+            height: auto;
+            max-height: 110px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        /* 3. SECCIÓN INFERIOR: BANNER DE AVISOS DE ACTIVIDAD */
+        .info-activity-banner {
+            border-radius: 18px;
+            padding: 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Estado inactivo (Mensaje en color Rojo si no hay actividad) */
+        .state-no-activity {
+            background: linear-gradient(135deg, #d63031, #b71c1c);
+            color: #ffffff;
+        }
+
+        /* Estado activo (Mensaje en color Verde si hay actividad) */
+        .state-has-activity {
+
+        /* [CONTINUACIÓN DESDE LOS ESTILOS] */
+        /* Estado activo (Mensaje en color Verde si hay actividad) */
+        .state-has-activity {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: #ffffff;
+        }
+
+        /* 4. PIE DE PÁGINA (ÚLTIMO DE LA WEB) */
+        footer {
+            width: 100%;
+            margin-top: auto;
+            padding: 25px 0 10px 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .footer-brand {
+            font-size: 15px;
+            color: #e0e0e0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Los 4 iconos de redes sociales solicitados */
+        .social-network-links {
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+        }
+
+        .social-network-links a {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 24px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .social-network-links a:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Iluminación con colores de marca reales */
+        .social-network-links .sn-ws:hover { color: #25D366; filter: drop-shadow(0 0 8px #25D366); }
+        .social-network-links .sn-tk:hover { color: #00f2fe; filter: drop-shadow(0 0 8px #00f2fe); }
+        .social-network-links .sn-ig:hover { color: #f77737; filter: drop-shadow(0 0 8px #f77737); filter: drop-shadow(0 0 8px #f77737); }
+        .social-network-links .sn-fb:hover { color: #1877F2; filter: drop-shadow(0 0 8px #1877F2); }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+
+        <!-- 1. Estado de Señal superior -->
+        <div class="header-status">
+            <div id="signalLive" class="status-badge status-live">
+                <span class="dot"></span>En Vivo
+            </div>
+            <div id="signalOffline" class="status-badge status-off">
+                <span class="dot"></span>Fuera del Aire
+            </div>
+        </div>
+
+        <!-- REPRODUCTOR PREMIUM -->
+        <div class="premium-player">
+            <!-- Selector de Colores -->
+            <div class="color-palette">
+                <div class="color-opt c-cyan active" onclick="applyTheme('#00f0ff')"></div>
+                <div class="color-opt c-purple" onclick="applyTheme('#a100ff')"></div>
+                <div class="color-opt c-neon-green" onclick="applyTheme('#39ff14')"></div>
+                <div class="color-opt c-orange" onclick="applyTheme('#ff6b00')"></div>
+            </div>
+
+            <!-- Contenedor del Logo de la Radio -->
+            <div class="logo-station-container">
+                <!-- Puedes cambiar este enlace por el logo real de la estación -->
+  <img src="img/vive.jpg" alt="Logo Vive FM">
+            </div>
+
+            <!-- Metadatos de la música -->
+            <div class="music-info">
+                <div class="song-title" id="songTitle">Señal Lista</div>
+                <div class="artist-name" id="artistName">Vive FM online</div>
+                <div class="playback-time" id="playbackTime">00:00:00</div>
+            </div>
+
+            <!-- Ondas / Ecualizador Visual integrado -->
+            <div class="audio-wave" id="visualEqualizer">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+            </div>
+
+            <!-- Controles Multimedia -->
+            <div class="player-controls">
+                
+         <Botton>
+                         <!-- Controles Multimedia -->
+            <div class="player-controls">
+                <button class="master-play-btn" id="masterPlayBtn" onclick="processPlayback()">
+                    <!-- Div interno que renderiza el triángulo geométrico premium -->
+                    <div class="play-triangle" id="actionIcon"></div>
+                </button>
+                
+                <div class="volume-box">
+                    <i class="fas fa-volume-mute"></i>
+                    <input type="range" class="volume-bar-input" id="volumeController" min="0" max="1" step="0.01" value="0.8" oninput="changeVolume(this.value)">
+                    <i class="fas fa-volume-up"></i>
+                </div>
+            </div>
+            
+             
+             
+         </Botton>      
+                
+                
+                
+                
+                
+            </div>
+
+        </div> <!-- Cierre de .premium-player -->
+
+        <!-- 2. CONTENEDOR DE PUBLICIDAD CON IMAGEN -->
+        <div class="commercial-container">
+            <!-- Espacio publicitario listo para cambiar la imagen o banner -->
+            <img src="img/vive.jpg" alt="aquí información">
+        </div>
+<i><h2> <center>Emisora cristiana 24 horas de entretenimiento</h2> </i>
+        <!-- 3. BANNER PARA AVISOS DE ACTIVIDAD DE LA CABINA -->
+        <div id="activityNoticeBanner" class="info-activity-banner state-no-activity">
+            Mensaje: No hay actividad en la cabina actualmente.
+        </div>
+
+        <!-- 4. PIE DE PÁGINA (ÚLTIMO ELEMENTO DE LA WEB) -->
+        <footer>
+            <div class="footer-brand"><center>Vive FM online siempre contigo</div>
+            
+            <!-- Redes sociales ordenadas exactamente como se pidieron -->
+            <div class="social-network-links">
+                <a href="https://wa.me" target="_blank" class="sn-ws" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://tiktok.com" target="_blank" class="sn-tk" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                <a href="https://instagram.com" target="_blank" class="sn-ig" title="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://facebook.com" target="_blank" class="sn-fb" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+            </div>
+        </footer>
+
+    </div> <!-- Cierre de .main-wrapper -->
+
+    <!-- Elemento Nativo del Streaming de Audio -->
+    <audio id="liveAudioSource" src="http://uk20freenew.listen2myradio.com:39849/stream " preload="none"></audio>
+
+    <!-- Lógica de Funcionamiento en JavaScript -->
+    <script>
+           
+        // --- CONFIGURACIÓN DE TUS EMISORAS ---
+        // Pegar aquí tu URL de Zeno Radio (Reemplaza esta de ejemplo por la tuya oficial)
+        const URL_ZENO_RESPALDO = "https://stream.zeno.fm/ctv5k5brgpfvv"; 
+        const URL_PRINCIPAL_LIVE = "http://uk20freenew.listen2myradio.com:39849/stream ";
+
+        const audioInstance = document.getElementById('liveAudioSource');
+        const visualEqualizer = document.getElementById('visualEqualizer');
+        const volumeController = document.getElementById('volumeController');
+        const playbackTime = document.getElementById('playbackTime');
+        const activityNoticeBanner = document.getElementById('activityNoticeBanner');
+        const signalLive = document.getElementById('signalLive');
+        const signalOffline = document.getElementById('signalOffline');
+
+        let chronologicalTimer;
+        let countSeconds = 0;
+        let usandoRespaldo = false;
+
+        // Recuperar configuraciones desde LocalStorage al cargar la página
+        window.addEventListener('DOMContentLoaded', () => {
+            const cacheColor = localStorage.getItem('viveFm_color') || '#00f0ff';
+            const cacheVolume = localStorage.getItem('viveFm_vol') || 0.8;
+
+            applyTheme(cacheColor);
+            volumeController.value = cacheVolume;
+            audioInstance.volume = cacheVolume;
+
+            toggleBannerAndStreamingUI(false);
+            refreshMeta();
+            
+            setInterval(refreshMeta, 18000); 
+        });
+
+        // Manejar el Streaming de Audio con Detección Automática de Caídas
+        function processPlayback() {
+            const playButtonElement = document.getElementById('masterPlayBtn');
+            
+            if (audioInstance.paused) {
+                // Primero intentamos conectar al streaming principal en vivo
+                audioInstance.src = URL_PRINCIPAL_LIVE;
+                audioInstance.load();
+                usandoRespaldo = false;
+                
+                audioInstance.play().then(() => {
+                    activarInterfazReproduccion(playButtonElement);
+                }).catch(error => {
+                    console.log("Señal principal fuera del aire. Conectando a Zeno Radio...");
+                    conectarStreamingRespaldo(playButtonElement);
+                });
+            } else {
+                detenerInterfazReproduccion(playButtonElement);
+            }
+        }
+
+        // Función para conectar al stream de Zeno Radio secundario
+        function conectarStreamingRespaldo(button) {
+            audioInstance.src = URL_ZENO_RESPALDO;
+            audioInstance.load();
+            usandoRespaldo = true;
+
+            audioInstance.play().then(() => {
+                activarInterfazReproduccion(button);
+            }).catch(err => {
+                console.error("Ambos streamings están inaccesibles en este momento:", err);
+                detenerInterfazReproduccion(button);
+            });
+        }
+
+        function activarInterfazReproduccion(button) {
+            button.classList.add('playing');
+            visualEqualizer.classList.add('active');
+            runClock();
+            toggleBannerAndStreamingUI(true);
+            refreshMeta();
+        }
+
+        function detenerInterfazReproduccion(button) {
+            audioInstance.pause();
+            button.classList.remove('playing');
+            visualEqualizer.classList.remove('active');
+            stopClock();
+            toggleBannerAndStreamingUI(false);
+            refreshMeta();
+        }
+
+        // Controlar y guardar el volumen
+        function changeVolume(amount) {
+            audioInstance.volume = amount;
+            localStorage.setItem('viveFm_vol', amount);
+        }
+
+        // Sistema de cambio de color del reproductor con almacenamiento local
+        function applyTheme(hex) {
+            document.documentElement.style.setProperty('--primary-color', hex);
+            let glowRgb = hexToRgbAlpha(hex, 0.25);
+            document.documentElement.style.setProperty('--border-glow', glowRgb);
+            localStorage.setItem('viveFm_color', hex);
+
+            document.querySelectorAll('.color-opt').forEach(circle => {
+                circle.classList.remove('active');
+                if (circle.style.backgroundColor === hex || rgbToHexFormat(circle.style.backgroundColor) === hex.toLowerCase()) {
+                    circle.classList.add('active');
+                }
+            });
+        }
+
+        // Sincronización del Banner y los Estados según la actividad real detectada
+        function toggleBannerAndStreamingUI(isPlaying) {
+            if (isPlaying) {
+                if (!usandoRespaldo) {
+                    // SEÑAL PRINCIPAL TRANSMITIENDO (Locutor en cabina)
+                    signalLive.style.display = "flex";
+                    signalOffline.style.display = "none";
+                    activityNoticeBanner.className = "info-activity-banner state-has-activity";
+                    activityNoticeBanner.textContent = "Mensaje: Transmitiendo Actividad en Vivo desde la Cabina Principal.";
+                } else {
+                    // LOCUTOR FUERA / SUENA EL DJ AUTOMÁTICO DE ZENO RADIO
+                    signalLive.style.display = "none";
+                    signalOffline.style.display = "flex"; // Cambia a Verde "Fuera del Aire"
+                    activityNoticeBanner.className = "info-activity-banner state-no-activity"; // Cambia a Rojo
+                    activityNoticeBanner.textContent = "Mensaje: Cabina inactiva. Escuchas Auto-DJ Programado (Zeno).";
+                }
+            } else {
+                // REPRODUCTOR PAUSADO COMPLETAMENTE POR EL OYENTE
+                signalLive.style.display = "none";
+                signalOffline.style.display = "flex";
+                activityNoticeBanner.className = "info-activity-banner state-no-activity";
+                activityNoticeBanner.textContent = "Mensaje: No hay actividad en la cabina actualmente.";
+            }
+        }
+
+        // Cronómetro de tiempo de escucha
+        function runClock() {
+            chronologicalTimer = setInterval(() => {
+                countSeconds++;
+                let h = Math.floor(countSeconds / 3600);
+                let m = Math.floor((countSeconds % 3600) / 60);
+                let s = countSeconds % 60;
+                playbackTime.textContent = `${h<10?'0'+h:h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+            }, 1000);
+        }
+
+        function stopClock() {
+            clearInterval(chronologicalTimer);
+        }
+
+        // Rotación de metadatos según la señal que esté sonando
+        function refreshMeta() {
+            if (!audioInstance.paused) {
+                if (!usandoRespaldo) {
+                    document.getElementById('songTitle').textContent = "Señal en Vivo";
+                    document.getElementById('artistName').textContent = "Vive FM - Cabina Central";
+                } else {
+                    document.getElementById('songTitle').textContent = "Programación Automatizada";
+                    document.getElementById('artistName').textContent = "Vive FM - Auto DJ Plataforma";
+                }
+            } else {
+                document.getElementById('songTitle').textContent = "Señal en Pausa";
+                document.getElementById('artistName').textContent = "Vive FM Estación";
+            }
+        }
+
+        // Funciones auxiliares para traducción de formatos de color
+        function hexToRgbAlpha(hex, alpha) {
+            let c = hex.substring(1).split('');
+            if(c.length === 3) c = [c, c, c, c, c, c];
+            let num = parseInt(c.join(''), 16);
+            return `rgba(${(num>>16)&255}, ${(num>>8)&255}, ${num&255}, ${alpha})`;
+        }
+
+        function rgbToHexFormat(rgb) {
+            if (!rgb) return '';
+            const match = rgb.match(/\d+/g);
+            if (!match) return rgb;
+            return "#" + match.slice(0, 3).map(x => {
+                const hex = parseInt(x).toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join("");
+        }
+    </script>
+    
+</body>
+</html>
+
+            
